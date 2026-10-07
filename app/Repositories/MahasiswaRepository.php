@@ -66,8 +66,8 @@ class MahasiswaRepository
     public function create(Mahasiswa $mhs): void
     {
         $stmt = $this->db->prepare(
-            "INSERT INTO mahasiswa (nim, nama, email, prodi_id, angkatan, status)
-             VALUES (:nim, :nama, :email, :prodi_id, :angkatan, :status)"
+            "INSERT INTO mahasiswa (nim, nama, prodi_id, angkatan, status)
+             VALUES (:nim, :nama, :prodi_id, :angkatan, :status)"
         );
         $stmt->execute($this->toParams($mhs));
     }
@@ -79,7 +79,7 @@ class MahasiswaRepository
 
         $stmt = $this->db->prepare(
             "UPDATE mahasiswa
-             SET nim = :nim, nama = :nama, email = :email,
+             SET nim = :nim, nama = :nama,
                  prodi_id = :prodi_id, angkatan = :angkatan, status = :status
              WHERE id = :id"
         );
@@ -103,7 +103,6 @@ class MahasiswaRepository
         $mhs = new Mahasiswa(
             $row['nim'],
             $row['nama'],
-            $row['email'],
             (int) $row['prodi_id'],
             (int) $row['angkatan'],
             $row['status']
@@ -123,7 +122,6 @@ class MahasiswaRepository
         return [
             'nim'      => $mhs->getNim(),
             'nama'     => $mhs->getNama(),
-            'email'    => $mhs->getEmail(),
             'prodi_id' => $mhs->getProdiId(),
             'angkatan' => $mhs->getAngkatan(),
             'status'   => $mhs->getStatus(),

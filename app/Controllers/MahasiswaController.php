@@ -111,12 +111,11 @@ class MahasiswaController extends Controller
     {
         $nim      = trim($_POST['nim'] ?? '');
         $nama     = trim($_POST['nama'] ?? '');
-        $email    = trim($_POST['email'] ?? '');
         $prodiId  = (int) ($_POST['prodi_id'] ?? 0);
         $angkatan = (int) ($_POST['angkatan'] ?? date('Y'));
         $status   = $_POST['status'] ?? 'aktif';
 
-        $mhs = new Mahasiswa($nim, $nama, $email, $prodiId, $angkatan, $status);
+        $mhs = new Mahasiswa($nim, $nama, $prodiId, $angkatan, $status);
         $mhs->setProdiId($prodiId); // validasi tambahan: prodi wajib dipilih
 
         return $mhs;

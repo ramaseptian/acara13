@@ -42,10 +42,6 @@
                         <input type="text" name="nama" value="<?= htmlspecialchars($mhs->getNama()) ?>" required>
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value="<?= htmlspecialchars($mhs->getEmail()) ?>" required>
-                    </div>
-                    <div class="form-group">
                         <label>Program Studi</label>
                         <select name="prodi_id" required>
                             <?php foreach ($prodiList as $prodi) : ?>

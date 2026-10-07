@@ -11,7 +11,6 @@ class Mahasiswa
     private ?int $id = null;
     private string $nim;
     private string $nama;
-    private string $email;
     private int $prodiId;
     private int $angkatan;
     private string $status;
@@ -20,11 +19,10 @@ class Mahasiswa
     // dipakai untuk keperluan tampilan saja.
     private ?string $prodiNama = null;
 
-    public function __construct(string $nim, string $nama, string $email, int $prodiId, int $angkatan, string $status = 'aktif')
+    public function __construct(string $nim, string $nama, int $prodiId, int $angkatan, string $status = 'aktif')
     {
         $this->setNim($nim);
         $this->setNama($nama);
-        $this->setEmail($email);
         $this->prodiId  = $prodiId;
         $this->angkatan = $angkatan;
         $this->setStatus($status);
@@ -34,7 +32,6 @@ class Mahasiswa
     public function getId(): ?int        { return $this->id; }
     public function getNim(): string     { return $this->nim; }
     public function getNama(): string    { return $this->nama; }
-    public function getEmail(): string   { return $this->email; }
     public function getProdiId(): int    { return $this->prodiId; }
     public function getAngkatan(): int   { return $this->angkatan; }
     public function getStatus(): string  { return $this->status; }
@@ -63,15 +60,6 @@ class Mahasiswa
             throw new InvalidArgumentException('Nama mahasiswa tidak boleh kosong.');
         }
         $this->nama = $nama;
-    }
-
-    // Validasi tambahan di luar minimum BKPM: format email harus valid.
-    public function setEmail(string $email): void
-    {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException('Format email tidak valid.');
-        }
-        $this->email = $email;
     }
 
     public function setProdiId(int $prodiId): void

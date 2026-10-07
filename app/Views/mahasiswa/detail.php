@@ -39,10 +39,6 @@
                         <div class="value"><?= htmlspecialchars($mhs->getNama()) ?></div>
                     </div>
                     <div class="detail-row">
-                        <div class="label">Email</div>
-                        <div class="value"><?= htmlspecialchars($mhs->getEmail()) ?></div>
-                    </div>
-                    <div class="detail-row">
                         <div class="label">Program Studi</div>
                         <div class="value">
                             <span class="badge-prodi"><?= htmlspecialchars($mhs->getProdiNama()) ?></span>

@@ -1,11 +1,10 @@
 <?php
 // config/database.php
-// Belum dipakai pada Acara 6 karena data masih berupa array (hardcode).
-// Disiapkan sesuai struktur folder BKPM; baru benar-benar digunakan mulai
-// Acara 7-8 saat aplikasi terhubung ke MySQL menggunakan PDO.
+// Konfigurasi koneksi database. Nama database mengikuti file acara_7.sql
+// (hasil export phpMyAdmin dari BKPM Acara 7), yaitu: acara_7
 return [
     'host'     => 'localhost',
-    'dbname'   => 'si_akademik',
+    'dbname'   => 'acara_7',
     'username' => 'root',
     'password' => '',
     'charset'  => 'utf8mb4',

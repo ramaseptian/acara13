@@ -40,10 +40,6 @@
                         <input type="text" name="nama" value="<?= htmlspecialchars($old['nama'] ?? '') ?>" required>
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value="<?= htmlspecialchars($old['email'] ?? '') ?>" required>
-                    </div>
-                    <div class="form-group">
                         <label>Program Studi</label>
                         <select name="prodi_id" required>
                             <option value="">-- Pilih Prodi --</option>

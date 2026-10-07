@@ -62,7 +62,6 @@
                             <tr>
                                 <th>NIM</th>
                                 <th>Nama</th>
-                                <th>Email</th>
                                 <th>Prodi</th>
                                 <th>Angkatan</th>
                                 <th>Status</th>
@@ -74,7 +73,6 @@
                                 <tr>
                                     <td><?= htmlspecialchars($mhs->getNim()) ?></td>
                                     <td><?= htmlspecialchars($mhs->getNama()) ?></td>
-                                    <td><?= htmlspecialchars($mhs->getEmail()) ?></td>
                                     <td>
                                         <span class="badge-prodi">
                                             <?= htmlspecialchars($mhs->getProdiNama()) ?>
