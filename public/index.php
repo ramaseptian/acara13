@@ -12,6 +12,8 @@ require_once __DIR__ . '/../app/Core/Middleware/AuthMiddleware.php';
 
 require_once __DIR__ . '/../app/Models/Mahasiswa.php';
 require_once __DIR__ . '/../app/Repositories/MahasiswaRepository.php';
+require_once __DIR__ . '/../app/Repositories/ProdiRepository.php';
+require_once __DIR__ . '/../app/Services/MahasiswaService.php';
 require_once __DIR__ . '/../app/Models/Prodi.php';
 require_once __DIR__ . '/../app/Models/Matakuliah.php';
 require_once __DIR__ . '/../app/Models/Dosen.php';

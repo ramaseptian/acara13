@@ -63,13 +63,33 @@ class MahasiswaRepository
         return $row ? $this->hydrate($row) : null;
     }
 
-    public function create(Mahasiswa $mhs): void
+    // Mengecek apakah NIM sudah dipakai. $exceptId dipakai saat update agar
+    // baris milik data itu sendiri tidak ikut dihitung (Acara 13).
+    public function existsByNim(string $nim, ?int $exceptId = null): bool
+    {
+        $sql    = "SELECT COUNT(*) FROM mahasiswa WHERE nim = :nim";
+        $params = ['nim' => $nim];
+
+        if ($exceptId !== null) {
+            $sql .= " AND id <> :except_id";
+            $params['except_id'] = $exceptId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public function create(Mahasiswa $mhs): int
     {
         $stmt = $this->db->prepare(
             "INSERT INTO mahasiswa (nim, nama, prodi_id, angkatan, status)
              VALUES (:nim, :nama, :prodi_id, :angkatan, :status)"
         );
         $stmt->execute($this->toParams($mhs));
+
+        return (int) $this->db->lastInsertId();
     }
 
     public function update(int $id, Mahasiswa $mhs): void
