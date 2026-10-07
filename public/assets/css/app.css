@@ -498,3 +498,10 @@ body {
     .sidebar.open { left: 0; }
     .main-content { padding: 20px; }
 }
+
+/* Pesan error validasi per field (Acara 13) */
+.field-error {
+    color: #b91c1c;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}

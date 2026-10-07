@@ -25,19 +25,23 @@
                 </div>
             </div>
 
-            <div class="form-card">
-                <?php if (!empty($error)) : ?>
-                    <div class="form-alert-error"><i class="bi bi-exclamation-triangle-fill me-1"></i><?= htmlspecialchars($error) ?></div>
-                <?php endif; ?>
+            <?php require __DIR__ . '/../partials/flash.php'; ?>
 
+            <div class="form-card">
                 <form method="POST" action="<?= base_url('mahasiswa/store') ?>">
                     <div class="form-group">
                         <label>NIM</label>
                         <input type="text" name="nim" value="<?= htmlspecialchars($old['nim'] ?? '') ?>" required autofocus>
+                    <?php if (!empty($errors['nim'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['nim']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Nama Lengkap</label>
                         <input type="text" name="nama" value="<?= htmlspecialchars($old['nama'] ?? '') ?>" required>
+                    <?php if (!empty($errors['nama'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['nama']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Program Studi</label>
@@ -49,10 +53,16 @@
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                    <?php if (!empty($errors['prodi_id'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['prodi_id']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Angkatan</label>
                         <input type="number" name="angkatan" value="<?= htmlspecialchars($old['angkatan'] ?? date('Y')) ?>" min="2000" max="2100" required>
+                    <?php if (!empty($errors['angkatan'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['angkatan']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Status</label>
@@ -62,6 +72,9 @@
                             <option value="cuti"  <?= $curStatus === 'cuti'  ? 'selected' : '' ?>>Cuti</option>
                             <option value="lulus" <?= $curStatus === 'lulus' ? 'selected' : '' ?>>Lulus</option>
                         </select>
+                    <?php if (!empty($errors['status'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['status']) ?></div>
+                    <?php endif; ?>
                     </div>
 
                     <div class="form-actions">

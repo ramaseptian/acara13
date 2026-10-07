@@ -25,12 +25,7 @@
                 </div>
             </div>
 
-            <?php if (!empty($flash)) : ?>
-                <div class="form-alert-success" data-flash>
-                    <i class="bi bi-check-circle-fill"></i>
-                    <?= htmlspecialchars($flash['message']) ?>
-                </div>
-            <?php endif; ?>
+            <?php require __DIR__ . '/../partials/flash.php'; ?>
 
             <div class="content-card">
                 <div class="content-card-header">

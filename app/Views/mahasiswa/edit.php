@@ -25,43 +25,57 @@
                 </div>
             </div>
 
-            <div class="form-card">
-                <?php if (!empty($error)) : ?>
-                    <div class="form-alert-error"><i class="bi bi-exclamation-triangle-fill me-1"></i><?= htmlspecialchars($error) ?></div>
-                <?php endif; ?>
+            <?php require __DIR__ . '/../partials/flash.php'; ?>
 
+            <div class="form-card">
                 <form method="POST" action="<?= base_url('mahasiswa/update') ?>">
                     <input type="hidden" name="id" value="<?= $mhs->getId() ?>">
 
                     <div class="form-group">
                         <label>NIM</label>
-                        <input type="text" name="nim" value="<?= htmlspecialchars($mhs->getNim()) ?>" required autofocus>
+                        <input type="text" name="nim" value="<?= htmlspecialchars($old['nim'] ?? $mhs->getNim()) ?>" required autofocus>
+                    <?php if (!empty($errors['nim'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['nim']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Nama Lengkap</label>
-                        <input type="text" name="nama" value="<?= htmlspecialchars($mhs->getNama()) ?>" required>
+                        <input type="text" name="nama" value="<?= htmlspecialchars($old['nama'] ?? $mhs->getNama()) ?>" required>
+                    <?php if (!empty($errors['nama'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['nama']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Program Studi</label>
                         <select name="prodi_id" required>
                             <?php foreach ($prodiList as $prodi) : ?>
-                                <option value="<?= $prodi['id'] ?>" <?= ($mhs->getProdiId() == $prodi['id']) ? 'selected' : '' ?>>
+                                <option value="<?= $prodi['id'] ?>" <?= (($old['prodi_id'] ?? $mhs->getProdiId()) == $prodi['id']) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($prodi['nama']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                    <?php if (!empty($errors['prodi_id'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['prodi_id']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Angkatan</label>
-                        <input type="number" name="angkatan" value="<?= htmlspecialchars($mhs->getAngkatan()) ?>" min="2000" max="2100" required>
+                        <input type="number" name="angkatan" value="<?= htmlspecialchars($old['angkatan'] ?? $mhs->getAngkatan()) ?>" min="2000" max="2100" required>
+                    <?php if (!empty($errors['angkatan'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['angkatan']) ?></div>
+                    <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label>Status</label>
+                        <?php $curStatus = $old['status'] ?? $mhs->getStatus(); ?>
                         <select name="status">
-                            <option value="aktif" <?= $mhs->getStatus() === 'aktif' ? 'selected' : '' ?>>Aktif</option>
-                            <option value="cuti"  <?= $mhs->getStatus() === 'cuti'  ? 'selected' : '' ?>>Cuti</option>
-                            <option value="lulus" <?= $mhs->getStatus() === 'lulus' ? 'selected' : '' ?>>Lulus</option>
+                            <option value="aktif" <?= $curStatus === 'aktif' ? 'selected' : '' ?>>Aktif</option>
+                            <option value="cuti"  <?= $curStatus === 'cuti'  ? 'selected' : '' ?>>Cuti</option>
+                            <option value="lulus" <?= $curStatus === 'lulus' ? 'selected' : '' ?>>Lulus</option>
                         </select>
+                    <?php if (!empty($errors['status'])) : ?>
+                        <div class="field-error"><?= htmlspecialchars($errors['status']) ?></div>
+                    <?php endif; ?>
                     </div>
 
                     <div class="form-actions">

@@ -1,22 +1,29 @@
 <?php
 // app/Controllers/MahasiswaController.php
-// Sejak Acara 9, Controller ini TIDAK membuat koneksi database sendiri.
-// Ia menerima MahasiswaRepository lewat constructor (Constructor Injection,
-// BKPM langkah 3) -- Controller memiliki Repository, Repository memiliki PDO.
+// Sejak Acara 13, Controller ini TIPIS: hanya menerima request, memanggil
+// MahasiswaService, lalu menentukan response (tampilkan view / redirect +
+// flash message). Tidak ada validasi dan tidak ada query database di sini:
+//   Controller (alur) -> Service (logika bisnis) -> Repository (database)
 class MahasiswaController extends Controller
 {
-    private MahasiswaRepository $repo;
+    private MahasiswaService $service;
 
     public function __construct()
     {
-        $this->repo = new MahasiswaRepository(Database::getInstance());
+        // Rangkaian dependency: Database -> Repository -> Service -> Controller
+        $db = Database::getInstance();
+
+        $this->service = new MahasiswaService(
+            new MahasiswaRepository($db),
+            new ProdiRepository($db)
+        );
     }
 
     public function index(): void
     {
         $keyword       = trim($_GET['q'] ?? '');
-        $mahasiswaList = $this->repo->allWithProdi($keyword !== '' ? $keyword : null);
-        $prodiList     = Prodi::all();
+        $mahasiswaList = $this->service->list($keyword !== '' ? $keyword : null);
+        $prodiList     = $this->service->prodiOptions();
         $flash         = flash_get();
 
         $this->view('mahasiswa/index', compact('mahasiswaList', 'prodiList', 'keyword', 'flash'));
@@ -25,7 +32,7 @@ class MahasiswaController extends Controller
     public function detail(): void
     {
         $nim = $_GET['nim'] ?? null;
-        $mhs = $this->repo->findByNim($nim);
+        $mhs = $this->service->findByNim($nim);
 
         if (!$mhs) {
             http_response_code(404);
@@ -38,35 +45,31 @@ class MahasiswaController extends Controller
 
     public function create(): void
     {
-        $prodiList = Prodi::all();
+        $prodiList = $this->service->prodiOptions();
         $old       = $_SESSION['old_mahasiswa'] ?? [];
-        $error     = $_SESSION['form_error'] ?? null;
-        unset($_SESSION['old_mahasiswa'], $_SESSION['form_error']);
+        $errors    = $_SESSION['form_errors'] ?? [];
+        unset($_SESSION['old_mahasiswa'], $_SESSION['form_errors']);
+        $flash     = flash_get();
 
-        $this->view('mahasiswa/create', compact('prodiList', 'old', 'error'));
+        $this->view('mahasiswa/create', compact('prodiList', 'old', 'errors', 'flash'));
     }
 
     public function store(): void
     {
-        try {
-            // Object Mahasiswa dibuat dari input request; validasi (BKPM
-            // langkah 5) berjalan otomatis di dalam setter saat constructor
-            // memanggilnya. Jika tidak valid, langsung terlempar exception.
-            $mhs = $this->buildEntityFromRequest();
-            $this->repo->create($mhs);
-            flash_set('success', 'Data mahasiswa berhasil ditambahkan.');
-            $this->redirect('mahasiswa');
-        } catch (InvalidArgumentException $e) {
-            $_SESSION['form_error']    = $e->getMessage();
-            $_SESSION['old_mahasiswa'] = $_POST;
-            $this->redirect('mahasiswa/create');
+        $result = $this->service->create($_POST);
+
+        if (!$result['success']) {
+            $this->backWithErrors($result['errors'], 'mahasiswa/create');
         }
+
+        flash_set('success', 'Data mahasiswa berhasil ditambahkan.');
+        $this->redirect('mahasiswa');
     }
 
     public function edit(): void
     {
         $id  = (int) ($_GET['id'] ?? 0);
-        $mhs = $this->repo->find($id);
+        $mhs = $this->service->findById($id);
 
         if (!$mhs) {
             http_response_code(404);
@@ -74,50 +77,63 @@ class MahasiswaController extends Controller
             return;
         }
 
-        $prodiList = Prodi::all();
-        $error     = $_SESSION['form_error'] ?? null;
-        unset($_SESSION['form_error']);
+        $prodiList = $this->service->prodiOptions();
+        $old       = $_SESSION['old_mahasiswa'] ?? [];
+        $errors    = $_SESSION['form_errors'] ?? [];
+        unset($_SESSION['old_mahasiswa'], $_SESSION['form_errors']);
+        $flash     = flash_get();
 
-        $this->view('mahasiswa/edit', compact('mhs', 'prodiList', 'error'));
+        $this->view('mahasiswa/edit', compact('mhs', 'prodiList', 'old', 'errors', 'flash'));
     }
 
     public function update(): void
     {
-        $id = (int) ($_POST['id'] ?? 0);
+        $id     = (int) ($_POST['id'] ?? 0);
+        $result = $this->service->update($id, $_POST);
 
-        try {
-            $mhs = $this->buildEntityFromRequest();
-            $this->repo->update($id, $mhs);
-            flash_set('success', 'Data mahasiswa berhasil diperbarui.');
-            $this->redirect('mahasiswa');
-        } catch (InvalidArgumentException $e) {
-            $_SESSION['form_error'] = $e->getMessage();
-            $this->redirect('mahasiswa/edit?id=' . $id);
+        if (!$result['success']) {
+            if (!empty($result['not_found'])) {
+                flash_set('error', $result['errors']['general']);
+                $this->redirect('mahasiswa');
+            }
+            $this->backWithErrors($result['errors'], 'mahasiswa/edit?id=' . $id);
         }
+
+        flash_set('success', 'Data mahasiswa berhasil diubah.');
+        $this->redirect('mahasiswa');
     }
 
     // Best Practice BKPM: destroy WAJIB lewat POST, bukan GET.
     public function destroy(): void
     {
-        $id = (int) ($_POST['id'] ?? 0);
-        $this->repo->delete($id);
-        flash_set('success', 'Data mahasiswa berhasil dihapus.');
+        $result = $this->service->delete((int) ($_POST['id'] ?? 0));
+
+        if ($result['success']) {
+            flash_set('success', 'Data mahasiswa berhasil dihapus.');
+        } else {
+            flash_set('error', $result['errors']['general'] ?? 'Data gagal dihapus.');
+        }
+
         $this->redirect('mahasiswa');
     }
 
-    // Membangun object Mahasiswa (Entity) dari input form. Melempar
-    // InvalidArgumentException apabila salah satu setter menolak nilainya.
-    private function buildEntityFromRequest(): Mahasiswa
+    // Menyimpan input lama + error per field ke session, membuat flash
+    // message bertipe error, lalu kembali ke form. Semua disimpan di
+    // session dan dihapus setelah sekali ditampilkan.
+    private function backWithErrors(array $errors, string $path): void
     {
-        $nim      = trim($_POST['nim'] ?? '');
-        $nama     = trim($_POST['nama'] ?? '');
-        $prodiId  = (int) ($_POST['prodi_id'] ?? 0);
-        $angkatan = (int) ($_POST['angkatan'] ?? date('Y'));
-        $status   = $_POST['status'] ?? 'aktif';
+        $_SESSION['old_mahasiswa'] = $_POST;
+        $_SESSION['form_errors']   = $errors;
 
-        $mhs = new Mahasiswa($nim, $nama, $prodiId, $angkatan, $status);
-        $mhs->setProdiId($prodiId); // validasi tambahan: prodi wajib dipilih
+        // Satu error (mis. "NIM sudah terdaftar.") ditampilkan apa adanya;
+        // beberapa error diringkas menjadi satu pesan "gagal disimpan".
+        if (count($errors) === 1) {
+            $message = reset($errors);
+        } else {
+            $message = 'Data gagal disimpan. Periksa kembali isian form.';
+        }
+        flash_set('error', $message);
 
-        return $mhs;
+        $this->redirect($path);
     }
 }
