@@ -6,12 +6,13 @@ Acara 6 (Middleware, Auth Sederhana, Struktur Folder Lengkap), Acara 7
 Relasi, dan CRUD Lengkap).
 
 ## Cara menjalankan
-1. Import `si_akademik.sql` melalui phpMyAdmin (tab SQL / Import) terlebih
-   dahulu. Pastikan database yang terbentuk bernama **si_akademik**, sama
-   seperti `dbname` pada `config/database.php`.
-2. Salin folder ini ke `C:\xampp\htdocs\kelazzz`.
+1. Buka phpMyAdmin, buat database baru bernama **acara_7**
+   (collation `utf8mb4_general_ci`), lalu pilih database tersebut dan
+   **Import** file `acara_7.sql`. Nama database harus sama dengan `dbname`
+   pada `config/database.php`.
+2. Salin folder ini ke `C:\xampp\htdocs\si-akademik`.
 3. Aktifkan modul **Apache** dan **MySQL** pada XAMPP.
-4. Akses `http://localhost/kelazzz/public/`.
+4. Akses `http://localhost/si-akademik/public/`.
 5. Login dengan akun contoh (hardcode): `admin` / `12345`.
 
 ## Fitur
@@ -40,8 +41,7 @@ Relasi, dan CRUD Lengkap).
 ## Acara 9 — OOP MVC Lanjutan (Object Composition, Dependency Injection, Getter/Setter)
 - `app/Models/Mahasiswa.php` sekarang murni Entity: seluruh atribut private,
   hanya bisa diakses lewat getter, dan hanya bisa diubah lewat setter yang
-  memvalidasi datanya (NIM harus angka, nama tidak boleh kosong, email harus
-  valid format-nya).
+  memvalidasi datanya (NIM harus angka, nama tidak boleh kosong).
 - `app/Repositories/MahasiswaRepository.php` (baru): menerima PDO lewat
   constructor (Constructor Injection), memusatkan seluruh query CRUD
   mahasiswa, dan selalu bekerja dengan object Mahasiswa, bukan array mentah.
@@ -78,3 +78,21 @@ Project ini dikelola dengan Git (repository GitHub: `si-akademik`).
   membuat Pull Request ke `main` di GitHub.
 
 Riwayat lengkap: `git log --oneline --graph --all`
+
+## Acara 13 — Service Layer, Validasi, Session, dan Business Logic
+- Database disamakan dengan `acara_7.sql` (nama database `acara_7`, tabel
+  `mahasiswa` TANPA kolom email). Kolom/field email dihapus dari Entity,
+  Repository, Controller, dan View.
+- `app/Services/MahasiswaService.php` (baru): menerima `MahasiswaRepository`
+  dan `ProdiRepository` lewat constructor. Berisi `create()`, `update()`,
+  `delete()` dan seluruh validasi mahasiswa (NIM wajib/angka/unik, nama wajib,
+  prodi harus ada, angkatan 2000-2100, status valid).
+- `app/Repositories/ProdiRepository.php` (baru): `all()`, `find()`, `exists()`.
+- `MahasiswaRepository`: ditambah `existsByNim()` dan `create()` kini
+  mengembalikan id baru.
+- `MahasiswaController` hanya mengatur alur: memanggil Service lalu
+  redirect/view. Tidak ada validasi dan query SQL di Controller.
+- Flash message (`$_SESSION['flash']`) bertipe success/error ditampilkan lewat
+  `app/Views/partials/flash.php` dan dihapus dari session setelah sekali tampil:
+  "Data mahasiswa berhasil ditambahkan/diubah", "NIM sudah terdaftar",
+  "Data gagal disimpan".
